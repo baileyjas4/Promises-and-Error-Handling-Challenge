@@ -1,6 +1,6 @@
 // ----- errors.ts ----- //
 
-// --- 1. Error when network fails
+// error for network error
 
 export class NetworkError extends Error {
     constructor(message: string) {
@@ -9,8 +9,7 @@ export class NetworkError extends Error {
     }
 };
 
-// --- 2. Error for data issues
-
+// this is for data error
 export class DataError extends Error {
     constructor(message: string) {
         super(message);

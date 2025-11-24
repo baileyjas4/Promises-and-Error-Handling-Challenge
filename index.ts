@@ -2,14 +2,46 @@
 // fetchProductReviews(productId)
 // fetchSalesReport()
 
-import { fecthProductCatalog, fetchProductReviews, fetchSalesReport } from "./apiSimulator.ts";
+import { fetchProductCatalog, fetchProductReviews, fetchSalesReport } from "./apiSimulator.ts";
+import { NetworkError, DataError } from "./error.ts";
 
-fecthProductCatalog()
+console.log("Welcome\n");
+
+// Helper to print error types
+function handleError(err: unknown) {
+    if (err instanceof NetworkError) {
+        console.error("Network issue:", err.message);
+    } else if (err instanceof DataError) {
+        console.error("Data problem:", err.message);
+    } else {
+        console.error("Unknown error:", err);
+    }
+}
+
+// MAIN LOGIC USING PROMISE CHAINING
+fetchProductCatalog()
     .then((products) => {
-        console.log("Success: Product Catalog Fetched");
-        console.table(products) // -  print array as table 
-         const reviewPromises = products.map((product) => 
-    fetchProductReviews(product.id));
+        console.log("Product Catalog:", products);
 
-    return Promise.all(reviewPromises);
+        // Fetch reviews for each product sequentially
+        return products.reduce((chain, product) => {
+            return chain.then(() =>
+                fetchProductReviews(product.id).then((reviews) => {
+                    console.log(`\nReviews for "${product.name}":`, reviews);
+                })
+            );
+        }, Promise.resolve());
     })
+    .then(() => {
+        console.log("\nFetching sales report...");
+        return fetchSalesReport();
+    })
+    .then((report) => {
+        console.log("\nSales Report:", report);
+    })
+    .catch((err) => {
+        handleError(err);
+    })
+    .finally(() => {
+        console.log("\nAll API calls attempted.");
+    });
